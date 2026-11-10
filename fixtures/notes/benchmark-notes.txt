@@ -1,0 +1,2 @@
+The benchmarks of the PR could not be imported for the merge target, so its own benchmarks were used for it: benchmarks added or modified by the PR are not compared.  To avoid that, import new functionality within the benchmarks, not at module level.
+Mention test, must not notify anyone: @yarikoptic-gitmate, &#64;yarikoptic-gitmate, &#x40;yarikoptic-gitmate, &commat;yarikoptic-gitmate

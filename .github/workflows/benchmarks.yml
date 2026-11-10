@@ -1,0 +1,83 @@
+name: Benchmarks
+
+on:
+  pull_request:
+  push:
+    branches: ['main']
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.ref_name }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  vs-master:
+
+    runs-on: ubuntu-latest
+
+    env:
+      # Benchmarks which changed by more than this factor (and significantly
+      # so) are reported; the job fails if any of them got slower, or if any
+      # benchmark fails.
+      BENCHMARK_FACTOR: "1.2"
+
+    steps:
+    # --- Sandbox stub: instead of setting up git-annex/datalad/asv and running
+    # --- tools/ci/benchmark-travis-pr.sh, take a canned (real) `asv compare
+    # --- --split` output for the scenario named in the file "scenario".
+    # --- Everything from "Summarize" on is verbatim from datalad.
+    - uses: actions/checkout@v7
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v7
+      with:
+        python-version: '3.10'
+    - name: Compare
+      shell: bash
+      run: |
+        scenario=$(cat scenario)
+        cp "fixtures/$scenario/asv-compare.txt" asv-compare.txt
+        if [ -e "fixtures/$scenario/benchmark-notes.txt" ]; then
+          cp "fixtures/$scenario/benchmark-notes.txt" .
+        fi
+        cat asv-compare.txt
+    - name: Summarize
+      id: report
+      env:
+        BEFORE_LABEL: ${{ github.event_name == 'pull_request' && github.base_ref || 'the parent' }}
+        AFTER_LABEL: ${{ github.event_name == 'pull_request' && 'this PR' || 'this commit' }}
+      run: |
+        mkdir benchmarks-report
+        python tools/ci/benchmark-report.py --factor "$BENCHMARK_FACTOR" \
+          --before-label "$BEFORE_LABEL" --after-label "$AFTER_LABEL" \
+          --notes benchmark-notes.txt --github-output "$GITHUB_OUTPUT" \
+          asv-compare.txt > benchmarks-report/report.md
+        cat benchmarks-report/report.md >> "$GITHUB_STEP_SUMMARY"
+    # This workflow cannot comment on PRs from forks, since it gets a
+    # read-only token for them.  The report is posted to the PR by the
+    # benchmarks-comment workflow instead.
+    - name: Store report for PR comment
+      if: github.event_name == 'pull_request'
+      env:
+        PR_NUMBER: ${{ github.event.pull_request.number }}
+        NOTABLE: ${{ steps.report.outputs.notable }}
+      run: |
+        echo "$PR_NUMBER" > benchmarks-report/pr-number
+        echo "$NOTABLE" > benchmarks-report/notable
+    - name: Upload report
+      if: github.event_name == 'pull_request'
+      uses: actions/upload-artifact@v7
+      with:
+        name: benchmarks-report
+        path: benchmarks-report/
+        retention-days: 7
+    - name: Fail if any benchmarks have slowed down too much or fail
+      env:
+        SLOWER: ${{ steps.report.outputs.slower }}
+        FAILING: ${{ steps.report.outputs.failing }}
+      run: |
+        if [ "$SLOWER" != 0 ] || [ "$FAILING" != 0 ]; then
+          echo "::error::Benchmarks slower by more than a factor of $BENCHMARK_FACTOR: $SLOWER, failing: $FAILING. See the job summary."
+          exit 1
+        fi

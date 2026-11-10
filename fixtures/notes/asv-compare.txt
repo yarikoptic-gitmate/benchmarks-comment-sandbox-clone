@@ -1,0 +1,12 @@
+
+Benchmarks that have stayed the same:
+
+| Change   | Before [0ecd4f25] <bm/merge-target>   | After [daa41fc1] <bm/pr>   | Ratio    | Benchmark (Parameter)                                       |
+|----------|---------------------------------------|----------------------------|----------|-------------------------------------------------------------|
+|          | n/a                                   | 469±20μs                   | n/a      | support.path.get_filtered_paths.time_filter                 |
+|          | n/a                                   | 133±20ns                   | n/a      | support.path.get_filtered_paths.time_new_function           |
+|          | 1.56±0.3ms                            | 3.48±0.1ms                 | 2.23     | support.path.get_parent_paths.time_allsubmods_toplevel      |
+|          | 1.02±0.1ms                            | 3.63±0.03ms                | 3.56     | support.path.get_parent_paths.time_allsubmods_toplevel_only |
+|          | 74.3±6ns                              | 2.16±0.02ms                | 29076.26 | support.path.get_parent_paths.time_no_submods               |
+|          | 753±20μs                              | 3.04±0.09ms                | 4.04     | support.path.get_parent_paths.time_one_submod_subdir        |
+|          | 759±8μs                               | 2.93±0.04ms                | 3.87     | support.path.get_parent_paths.time_one_submod_toplevel      |

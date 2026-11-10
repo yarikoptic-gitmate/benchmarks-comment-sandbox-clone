@@ -1,0 +1,17 @@
+
+Benchmarks that have improved:
+
+| Change   | Before [0ecd4f25] <bm/merge-target>   | After [9a6f8e56] <bm/pr>   | Ratio   | Benchmark (Parameter)                             |
+|----------|---------------------------------------|----------------------------|---------|---------------------------------------------------|
+| -        | 2.90±0.1ms                            | 451±30μs                   | 0.16    | support.path.get_filtered_paths.time_filter       |
+| *        | failed                                | 118±8ns                    | n/a     | support.path.get_filtered_paths.time_new_function |
+
+Benchmarks that have got worse:
+
+| Change   | Before [0ecd4f25] <bm/merge-target>   | After [9a6f8e56] <bm/pr>   |    Ratio | Benchmark (Parameter)                                       |
+|----------|---------------------------------------|----------------------------|----------|-------------------------------------------------------------|
+| +        | 1.14±0.04ms                           | 3.48±0.2ms                 |     3.04 | support.path.get_parent_paths.time_allsubmods_toplevel      |
+| +        | 997±40μs                              | 3.15±0.04ms                |     3.16 | support.path.get_parent_paths.time_allsubmods_toplevel_only |
+| +        | 87.1±1ns                              | 2.15±0.01ms                | 24618.9  | support.path.get_parent_paths.time_no_submods               |
+| +        | 753±8μs                               | 2.93±0.02ms                |     3.89 | support.path.get_parent_paths.time_one_submod_subdir        |
+| +        | 762±10μs                              | 2.96±0.06ms                |     3.88 | support.path.get_parent_paths.time_one_submod_toplevel      |
